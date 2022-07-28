@@ -5,4 +5,4 @@ if [[ -n "$1" && ! "$1" =~ ^-.* ]]; then
 else
     host="frigo"
 fi
-nixos-rebuild -v --flake ".#$host" --target-host "root@$host" --build-host localhost switch "$@"
+nixos-rebuild --flake ".#$host" --target-host "root@$host" --build-host localhost switch "$@"

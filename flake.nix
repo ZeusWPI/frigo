@@ -7,13 +7,14 @@
       url = "github:numtide/flake-utils/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nixos-hardware.url = "github:NixOS/nixos-hardware";
     home-manager = {
       url = "github:nix-community/home-manager/master";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, flake-utils }:
+  outputs = { self, nixpkgs, home-manager, flake-utils, nixos-hardware }:
     let
       version-suffix = nixpkgs.rev or (builtins.toString nixpkgs.lastModified);
       pkgsFor = system: import nixpkgs {
@@ -30,6 +31,8 @@
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
           })
+
+          nixos-hardware.nixosModules.raspberry-pi-4
 
           # Automatically load custom modules
           #(./modules)

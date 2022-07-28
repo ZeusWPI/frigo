@@ -6,7 +6,7 @@
 
   # NixOS wants to enable GRUB by default
   boot.loader.grub.enable = false;
-  boot.loader.generic-extlinux-compatible.enable = true;
+  boot.loader.generic-extlinux-compatible.enable = false;
 
   boot = {
     kernelPackages = pkgs.linuxPackages_rpi4;
@@ -22,11 +22,10 @@
     ];
   };
 
- # boot.loader.raspberryPi = {
- #   enable = true;
- #   version = 4;
- # };
-
+  boot.loader.raspberryPi = {
+    enable = true;
+    version = 4;
+  };
 
   environment.systemPackages = with pkgs; [
     libraspberrypi
@@ -35,10 +34,16 @@
 
   hardware.enableRedistributableFirmware = true;
 
-  fileSystems."/" = {
-    device = "/dev/disk/by-label/NIXOS_SD";
-    fsType = "ext4";
-    options = [ "noatime" ];
+  fileSystems = {
+    "/" = {
+      device = "/dev/disk/by-label/NIXOS_SD";
+      fsType = "ext4";
+      options = [ "noatime" ];
+    };
+    "/boot" = {
+      device = "/dev/disk/by-label/FIRMWARE";
+      fsType = "vfat";
+    };
   };
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "ondemand";

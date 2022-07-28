@@ -9,18 +9,8 @@ let
   ];
   stateVersion = "22.11";
   browser = pkgs.firefox;
-  autostart = ''
-    #!${pkgs.bash}/bin/bash
-    # End all lines with '&' to not halt startup script execution
-
-    # https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options
-    firefox --kiosk https://tap.zeus.gent/ &
-  '';
 in {
-  imports =
-    [
-      ./hardware-configuration.nix
-    ];
+  imports = [ ./hardware-configuration.nix ];
 
   i18n.defaultLocale = "en_US.UTF-8";
   time.timeZone = "Europe/Brussels";
@@ -110,7 +100,13 @@ in {
 
   home-manager.users.${ kioskUser } = { pkgs, ... }: {
     home.stateVersion =  stateVersion;
-    xdg.configFile."openbox/autostart".source = pkgs.writeScript "autostart" autostart;
+      xdg.configFile."openbox/autostart".text = ''
+      #!${pkgs.bash}/bin/bash
+      # End all lines with '&' to not halt startup script execution
+
+      # https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options
+      firefox --kiosk https://tap.zeus.gent/ &
+    '';
   };
 
   # Don't change this.
