@@ -101,12 +101,12 @@ in {
   home-manager.users.${ kioskUser } = { pkgs, ... }: {
     home.stateVersion =  stateVersion;
       xdg.configFile."openbox/autostart".text = ''
-      #!${pkgs.bash}/bin/bash
-      # End all lines with '&' to not halt startup script execution
+        #!${pkgs.bash}/bin/bash
+        # End all lines with '&' to not halt startup script execution
 
-      # https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options
-      firefox --kiosk https://tap.zeus.gent/ &
-    '';
+        # https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options
+        ${pkgs.firefox}/bin/firefox --kiosk https://tap.zeus.gent/ &
+      '';
   };
 
   # Don't change this.
