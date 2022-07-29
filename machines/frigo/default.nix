@@ -89,7 +89,7 @@ in {
       lightdm.enable = true;
       autoLogin = {
         enable = true;
-        user = adminUser;
+        user = kioskUser;
       };
     };
     windowManager.openbox.enable = true;
