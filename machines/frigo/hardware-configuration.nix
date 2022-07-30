@@ -26,7 +26,6 @@
         enable = true;
         version = 4;
         firmwareConfig = ''
-          lcd_rotate=2
           dtoverlay=vc4-kms-v3d
           display_auto_detect=1
           [pi4]

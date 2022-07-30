@@ -3,6 +3,10 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-utils = {
       url = "github:numtide/flake-utils";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -14,7 +18,7 @@
     };
   };
 
-  outputs = { self, nixpkgs, home-manager, flake-utils, nixos-hardware }:
+  outputs = { self, nixpkgs, home-manager, flake-utils, nixos-hardware, agenix }:
     let
       version-suffix = nixpkgs.rev or (builtins.toString nixpkgs.lastModified);
       pkgsFor = system: import nixpkgs {
@@ -33,6 +37,7 @@
           })
 
           nixos-hardware.nixosModules.raspberry-pi-4
+          agenix.nixosModules.age
 
           # Automatically load custom modules
           #(./modules)
@@ -59,7 +64,7 @@
         in
         {
           devShell = pkgs.mkShell {
-            buildInputs = with pkgs; [ nixpkgs-fmt ];
+            buildInputs = with pkgs; [ nixpkgs-fmt nixos-rebuild agenix.packages.${system}.agenix ];
           };
         }) // {
       nixosConfigurations = {

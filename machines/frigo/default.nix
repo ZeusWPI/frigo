@@ -104,9 +104,13 @@ in {
         #!${pkgs.bash}/bin/bash
         # End all lines with '&' to not halt startup script execution
 
-        # https://developer.mozilla.org/en-US/docs/Mozilla/Command_Line_Options
-        ${pkgs.firefox}/bin/firefox --kiosk https://tap.zeus.gent/ &
+        ${pkgs.chromium}/bin/chromium --kiosk $(cat ${config.age.secrets.url.path}) &
       '';
+  };
+
+  age.secrets.url = {
+    file = ../../secrets/url.age;
+    owner = kioskUser;
   };
 
   # Don't change this.
