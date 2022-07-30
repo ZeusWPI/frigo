@@ -104,7 +104,7 @@ in {
         #!${pkgs.bash}/bin/bash
         # End all lines with '&' to not halt startup script execution
 
-        ${pkgs.chromium}/bin/chromium --kiosk $(cat ${config.age.secrets.url.path}) &
+        ${pkgs.chromium}/bin/chromium --force-device-scale-factor=0.6 --kiosk $(cat ${config.age.secrets.url.path}) &
       '';
   };
 
