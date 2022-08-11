@@ -76,12 +76,6 @@ in {
     ];
   };
 
-  #services.cage = {
-  #  user = kioskUser;
-  #  program = "${pkgs.firefox}/bin/firefox --kiosk https://tap.zeus.gent";
-  #  enable = true;
-  #};
-
   services.xserver = {
     enable = true;
     libinput.enable = true;
@@ -94,7 +88,6 @@ in {
     };
     windowManager.openbox.enable = true;
     displayManager.defaultSession = "none+openbox";
-    videoDrivers = [ "fbdev" ];
   };
 
 
