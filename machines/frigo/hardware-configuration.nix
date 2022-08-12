@@ -11,14 +11,6 @@
       kernelModules = [ "vc4" ];
       availableKernelModules = [ "usbhid" "usb_storage" "vc4" "bcm2835_dma" "i2c_bcm2835" ];
     };
-    # ttyAMA0 is the serial console broken out to the GPIO
-    kernelParams = [
-        "8250.nr_uarts=1"
-        "console=ttyAMA0,115200"
-        "console=tty1"
-        # A lot GUI programs need this, nearly all wayland applications
-        "cma=128M"
-    ];
     loader = {
       grub.enable = false;
       generic-extlinux-compatible.enable = false;
@@ -26,8 +18,8 @@
         enable = true;
         version = 4;
         firmwareConfig = ''
-          dtoverlay=vc4-kms-v3d
-          display_auto_detect=1
+          arm_64bit=1
+          lcd_rotate=2
           [pi4]
           arm_boost=1
         '';
@@ -37,10 +29,189 @@
 
   environment.systemPackages = with pkgs; [
     libraspberrypi
+    raspberrypifw
   ];
 
   hardware = {
     enableRedistributableFirmware = true;
+    deviceTree = {
+      filter = lib.mkForce "*rpi*.dtb";
+      overlays = [
+        {
+          name = "cma";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+            / {
+              compatible = "brcm,bcm";
+              fragment@0 {
+                target = <&cma>;
+                __overlay__ {
+                  size = <(512 * 1024 * 1024)>;
+                };
+              };
+            };
+          '';
+        }
+        {
+          name = "audio-on-overlay";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+            / {
+              compatible = "brcm,bcm2711";
+              fragment@0 {
+                target = <&audio>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+            };
+          '';
+        }
+        {
+          name = "bcm2708";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+            / {
+              compatible = "brcm,bcm2708";
+              fragment@1 {
+                target = <&fb>;
+                __overlay__ {
+                  status = "disabled";
+                };
+              };
+              fragment@2 {
+                target = <&firmwarekms>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@3 {
+                target = <&v3d>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@4 {
+                target = <&vc4>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+            };
+          '';
+        }
+        {
+          name = "bcm2709";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+            / {
+              compatible = "brcm,2709";
+              fragment@1 {
+                target = <&fb>;
+                __overlay__ {
+                  status = "disabled";
+                };
+              };
+              fragment@2 {
+                target = <&firmwarekms>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@3 {
+                target = <&v3d>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@4 {
+                target = <&vc4>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+            };
+          '';
+        }
+        {
+          name = "bcm2710";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+            / {
+              compatible = "brcm,bcm2710";
+              fragment@1 {
+                target = <&fb>;
+                __overlay__ {
+                  status = "disabled";
+                };
+              };
+              fragment@2 {
+                target = <&firmwarekms>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@3 {
+                target = <&v3d>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@4 {
+                target = <&vc4>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+            };
+          '';
+        }
+        {
+          name = "bcm2711";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+            / {
+              compatible = "brcm,bcm2711";
+              fragment@1 {
+                target = <&fb>;
+                __overlay__ {
+                  status = "disabled";
+                };
+              };
+              fragment@2 {
+                target = <&firmwarekms>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@3 {
+                target = <&v3d>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+              fragment@4 {
+                target = <&vc4>;
+                __overlay__ {
+                  status = "okay";
+                };
+              };
+            };
+          '';
+        }
+      ];
+    };
+
+    firmware = [
+      pkgs.wireless-regdb
+      pkgs.raspberrypiWirelessFirmware
+    ];
   };
 
   fileSystems = {
