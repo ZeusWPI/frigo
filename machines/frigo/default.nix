@@ -52,6 +52,7 @@ in {
     zip
     dnsutils
     libinput
+    xscreensaver
   ];
 
   nix = {
@@ -93,11 +94,13 @@ in {
 
   home-manager.users.${ kioskUser } = { pkgs, ... }: {
     home.stateVersion =  stateVersion;
+      home.file.".xscreensaver".source = ./xscreensaver-config;
       xdg.configFile."openbox/autostart".text = ''
         #!${pkgs.bash}/bin/bash
         # End all lines with '&' to not halt startup script execution
 
-        ${pkgs.chromium}/bin/chromium --force-device-scale-factor=0.6 --kiosk $(cat ${config.age.secrets.url.path}) &
+        ${pkgs.xscreensaver}/bin/xscreensaver --no-splash &
+        ${pkgs.ungoogled-chromium}/bin/chromium --force-device-scale-factor=0.6 --kiosk $(cat ${config.age.secrets.url.path}) &
       '';
   };
 
