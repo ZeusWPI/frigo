@@ -1,6 +1,5 @@
 { lib, config, pkgs, modulesPath, ... }:
 let
-  adminUser = "zeus";
   kioskUser = "kiosk";
   sshKeys = [
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICgJTRCWS9rKQ5g0226IxoeCs74CERdggA0YruAdtlYY" # rien
@@ -8,8 +7,8 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGgQgerwZXVnVBCfwtWW6m0wg4P4CsrQ6DkjJ61oC6LJ" # redfast00
   ];
   stateVersion = "22.11";
-  browser = pkgs.firefox;
-in {
+in
+{
   imports = [ ./hardware-configuration.nix ];
 
   i18n.defaultLocale = "en_US.UTF-8";
@@ -17,50 +16,14 @@ in {
 
   users.users.root.openssh.authorizedKeys.keys = sshKeys;
 
-  users.users.${ adminUser } = {
-    isNormalUser = true;
-    group = adminUser;
-    extraGroups = [ "wheel" ];
-    openssh.authorizedKeys.keys = sshKeys;
-  };
-  users.users.${ kioskUser } = {
+  users.users.${kioskUser} = {
     isNormalUser = true;
     group = kioskUser;
   };
 
-  users.groups.${ adminUser } = {};
-  users.groups.${ kioskUser } = {};
+  environment.systemPackages = with pkgs; [ xscreensaver ];
 
-  home-manager.users.${ adminUser } = { pkgs, ... }: {
-    home.stateVersion =  stateVersion;
-    programs.bash = {
-      enable = true;
-    };
-  };
-
-  environment.systemPackages = with pkgs; [
-    acpi
-    fd
-    file
-    jq
-    lsof
-    pciutils
-    ripgrep
-    strace
-    unzip
-    wget
-    zip
-    dnsutils
-    libinput
-    xscreensaver
-  ];
-
-  nix = {
-    package = pkgs.nixFlakes;
-    extraOptions = ''
-        experimental-features = nix-command flakes
-    '';
-  };
+  nix.extraOptions = ''experimental-features = nix-command flakes'';
 
   services.openssh = {
     enable = true;
@@ -72,9 +35,7 @@ in {
     hostName = "frigo";
     useDHCP = false;
     interfaces.eth0.useDHCP = true;
-    timeServers = [
-      "ntp.ugent.be"
-    ];
+    timeServers = [ "ntp.ugent.be" ];
   };
 
   services.xserver = {
@@ -93,16 +54,16 @@ in {
   };
 
 
-  home-manager.users.${ kioskUser } = { pkgs, ... }: {
-    home.stateVersion =  stateVersion;
-      home.file.".xscreensaver".source = ./xscreensaver-config;
-      xdg.configFile."openbox/autostart".text = ''
-        #!${pkgs.bash}/bin/bash
-        # End all lines with '&' to not halt startup script execution
+  home-manager.users.${kioskUser} = { pkgs, ... }: {
+    home.stateVersion = stateVersion;
+    home.file.".xscreensaver".source = ./xscreensaver-config;
+    xdg.configFile."openbox/autostart".text = ''
+      #!${pkgs.bash}/bin/bash
+      # End all lines with '&' to not halt startup script execution
 
-        ${pkgs.xscreensaver}/bin/xscreensaver --no-splash &
-        ${pkgs.ungoogled-chromium}/bin/chromium --force-device-scale-factor=0.6 --kiosk $(cat ${config.age.secrets.url.path}) &
-      '';
+      ${pkgs.xscreensaver}/bin/xscreensaver --no-splash &
+      ${pkgs.ungoogled-chromium}/bin/chromium --force-device-scale-factor=0.6 --kiosk $(cat ${config.age.secrets.url.path}) &
+    '';
   };
 
   age.secrets.url = {
