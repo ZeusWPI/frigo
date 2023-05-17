@@ -2,18 +2,15 @@
   description = "Nixos configuration";
 
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-22.11";
     agenix = {
       url = "github:ryantm/agenix";
+      inputs.home-manager.follows = "home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    flake-utils = {
-      url = "github:numtide/flake-utils";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-    nixos-hardware.url = "github:NixOS/nixos-hardware";
+    flake-utils.url = "github:numtide/flake-utils";
     home-manager = {
-      url = "github:nix-community/home-manager";
+      url = "github:nix-community/home-manager/release-22.11";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -36,21 +33,7 @@
             home-manager.useUserPackages = true;
           })
 
-          nixos-hardware.nixosModules.raspberry-pi-4
           agenix.nixosModules.age
-
-          # Automatically load custom modules
-          #(./modules)
-
-          # Expose the currently deployed nixpkgs in /etc/nixpkgs/
-          ({ pkgs, ... }: {
-            environment.etc."nixpkgs".source = (pkgs.runCommandNoCC "nixpkgs" { } ''
-              cp -r ${nixpkgs} $out
-              chmod 700 $out
-              echo "${version-suffix}" > $out/.version-suffix
-            '');
-            nix.nixPath = [ "nixpkgs=/etc/nixpkgs" ];
-          })
 
           # Load the config for our current machine
           (./. + "/machines/${hostname}")
@@ -66,9 +49,10 @@
           devShell = pkgs.mkShell {
             buildInputs = with pkgs; [ nixpkgs-fmt nixos-rebuild agenix.packages.${system}.agenix ];
           };
-        }) // {
+        }) // rec {
       nixosConfigurations = {
         frigo = mkSystem "aarch64-linux" "frigo";
       };
+      images.frigo = nixosConfigurations.frigo.config.system.build.sdImage;
     };
 }

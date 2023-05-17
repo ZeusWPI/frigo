@@ -1,4 +1,4 @@
-{ lib, config, pkgs, modulesPath, ... }:
+{ lib, config, pkgs, ... }:
 let
   kioskUser = "kiosk";
   sshKeys = [
@@ -20,6 +20,8 @@ in
     isNormalUser = true;
     group = kioskUser;
   };
+
+  users.groups.${kioskUser} = { };
 
   environment.systemPackages = with pkgs; [ xscreensaver ];
 

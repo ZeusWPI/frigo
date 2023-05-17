@@ -1,29 +1,44 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-  imports = [ (modulesPath + "/installer/scan/not-detected.nix") ];
+  imports = [
+    (modulesPath + "/installer/sd-card/sd-image-aarch64.nix")
+  ];
+
+  nixpkgs.overlays = [
+    (self: super: {
+      # Avoid building zfs-enabled kernel
+      zfs = super.zfs.overrideAttrs (_: {
+        meta.platforms = [ ];
+      });
+    })
+    # Allow missing firmware in kernel
+    (final: super: {
+      makeModulesClosure = x:
+        super.makeModulesClosure (x // { allowMissing = true; });
+    })
+  ];
+
+  sdImage.compressImage = false;
 
   boot = {
-    kernelPackages = pkgs.linuxPackages_rpi4;
     tmpOnTmpfs = true;
+    kernelPackages = pkgs.linuxKernel.packages.linux_rpi4;
     initrd = {
-      includeDefaultModules = false;
       kernelModules = [ "vc4" ];
-      availableKernelModules = [ "usbhid" "usb_storage" "vc4" "bcm2835_dma" "i2c_bcm2835" ];
+      availableKernelModules = [
+        "usbhid"
+        "usb_storage"
+        "vc4"
+        "bcm2835_dma"
+        "i2c_bcm2835"
+        "pcie_brcmstb"
+        "reset-raspberrypi"
+      ];
     };
     loader = {
-      grub.enable = false;
-      generic-extlinux-compatible.enable = false;
-      raspberryPi = {
-        enable = true;
-        version = 4;
-        firmwareConfig = ''
-          arm_64bit=1
-          lcd_rotate=2
-          [pi4]
-          arm_boost=1
-        '';
-      };
+      grub.enable = lib.mkDefault false;
+      generic-extlinux-compatible.enable = lib.mkDefault true;
     };
   };
 
@@ -33,9 +48,8 @@
   ];
 
   hardware = {
-    enableRedistributableFirmware = true;
     deviceTree = {
-      filter = lib.mkForce "*rpi*.dtb";
+      filter = "bcm2711-rpi-*.dtb";
       overlays = [
         {
           name = "cma";
@@ -48,124 +62,6 @@
                 target = <&cma>;
                 __overlay__ {
                   size = <(512 * 1024 * 1024)>;
-                };
-              };
-            };
-          '';
-        }
-        {
-          name = "audio-on-overlay";
-          dtsText = ''
-            /dts-v1/;
-            /plugin/;
-            / {
-              compatible = "brcm,bcm2711";
-              fragment@0 {
-                target = <&audio>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-            };
-          '';
-        }
-        {
-          name = "bcm2708";
-          dtsText = ''
-            /dts-v1/;
-            /plugin/;
-            / {
-              compatible = "brcm,bcm2708";
-              fragment@1 {
-                target = <&fb>;
-                __overlay__ {
-                  status = "disabled";
-                };
-              };
-              fragment@2 {
-                target = <&firmwarekms>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-              fragment@3 {
-                target = <&v3d>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-              fragment@4 {
-                target = <&vc4>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-            };
-          '';
-        }
-        {
-          name = "bcm2709";
-          dtsText = ''
-            /dts-v1/;
-            /plugin/;
-            / {
-              compatible = "brcm,2709";
-              fragment@1 {
-                target = <&fb>;
-                __overlay__ {
-                  status = "disabled";
-                };
-              };
-              fragment@2 {
-                target = <&firmwarekms>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-              fragment@3 {
-                target = <&v3d>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-              fragment@4 {
-                target = <&vc4>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-            };
-          '';
-        }
-        {
-          name = "bcm2710";
-          dtsText = ''
-            /dts-v1/;
-            /plugin/;
-            / {
-              compatible = "brcm,bcm2710";
-              fragment@1 {
-                target = <&fb>;
-                __overlay__ {
-                  status = "disabled";
-                };
-              };
-              fragment@2 {
-                target = <&firmwarekms>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-              fragment@3 {
-                target = <&v3d>;
-                __overlay__ {
-                  status = "okay";
-                };
-              };
-              fragment@4 {
-                target = <&vc4>;
-                __overlay__ {
-                  status = "okay";
                 };
               };
             };
@@ -205,25 +101,60 @@
             };
           '';
         }
+        {
+          name = "rpi-ft5406-overlay";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+            / {
+            	compatible = "brcm,bcm2711";
+            	fragment@0 {
+            		target-path = "/soc/firmware";
+            		__overlay__ {
+            			ts: touchscreen {
+            				compatible = "raspberrypi,firmware-ts";
+            				touchscreen-size-x = <800>;
+            				touchscreen-size-y = <480>;
+            			};
+            		};
+            	};
+            	__overrides__ {
+            		touchscreen-size-x = <&ts>,"touchscreen-size-x:0";
+            		touchscreen-size-y = <&ts>,"touchscreen-size-y:0";
+            		touchscreen-inverted-x = <&ts>,"touchscreen-inverted-x?";
+            		touchscreen-inverted-y = <&ts>,"touchscreen-inverted-y?";
+            		touchscreen-swapped-x-y = <&ts>,"touchscreen-swapped-x-y?";
+              };
+            };
+          '';
+        }
+        {
+          name = "rpi4-cpu-revision";
+          dtsText = ''
+            /dts-v1/;
+            /plugin/;
+
+            / {
+              compatible = "raspberrypi,4-model-b";
+
+              fragment@0 {
+                target-path = "/";
+                __overlay__ {
+                  system {
+                    linux,revision = <0x00d03114>;
+                  };
+                };
+              };
+            };
+          '';
+        }
       ];
     };
-
+    enableRedistributableFirmware = true;
     firmware = [
       pkgs.wireless-regdb
       pkgs.raspberrypiWirelessFirmware
     ];
-  };
-
-  fileSystems = {
-    "/" = {
-      device = "/dev/disk/by-label/NIXOS_SD";
-      fsType = "ext4";
-      options = [ "noatime" ];
-    };
-    "/boot" = {
-      device = "/dev/disk/by-label/FIRMWARE";
-      fsType = "vfat";
-    };
   };
 
   powerManagement.cpuFreqGovernor = lib.mkDefault "ondemand";
