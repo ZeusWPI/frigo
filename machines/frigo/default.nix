@@ -29,8 +29,10 @@ in
 
   services.openssh = {
     enable = true;
-    permitRootLogin = (lib.mkForce "prohibit-password");
-    kbdInteractiveAuthentication = false;
+    settings = {
+      PermitRootLogin = (lib.mkForce "prohibit-password");
+      KbdInteractiveAuthentication = false;
+    };
   };
 
   networking = {
