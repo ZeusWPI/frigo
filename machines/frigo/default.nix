@@ -5,6 +5,7 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICgJTRCWS9rKQ5g0226IxoeCs74CERdggA0YruAdtlYY" # rien
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJY5nXR/V6wcMRxugD7GTOF8kwfGnAT2CRuJ2Qi60vsm" # chvp
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGgQgerwZXVnVBCfwtWW6m0wg4P4CsrQ6DkjJ61oC6LJ" # redfast00
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFgMEJ9Z+wTwfwWBNzUSOD6TII1kziXAyVVEWWyCcOdE" # xerbalind
   ];
   stateVersion = "22.11";
 in
@@ -38,8 +39,39 @@ in
   networking = {
     hostName = "frigo";
     useDHCP = false;
-    interfaces.eth0.useDHCP = true;
     timeServers = [ "ntp.ugent.be" ];
+    wireless = {
+      enable = true;
+      environmentFile = config.age.secrets.wifi-env.path;
+      interfaces = [ "wlan0" ];
+      networks = {
+        "Zeus WPI" = {
+          psk = "@PSK_Zeus@";
+          hidden = true;
+        };
+      };
+    };
+  };
+
+  systemd.network = {
+    enable = true;
+    networks = {
+      wlan0 = {
+        enable = true;
+        DHCP = "yes";
+        matchConfig = { Name = "wlan0"; };
+        dhcpV4Config = { RouteMetric = 20; };
+        ipv6AcceptRAConfig = { RouteMetric = 20; };
+      };
+      eth0 = {
+        enable = true;
+        DHCP = "yes";
+        matchConfig = { Name = "eth0"; };
+        dhcpV4Config = { RouteMetric = 10; };
+        ipv6AcceptRAConfig = { RouteMetric = 10; };
+      };
+    };
+    wait-online.anyInterface = true;
   };
 
   services.xserver = {
@@ -70,9 +102,12 @@ in
     '';
   };
 
-  age.secrets.url = {
-    file = ../../secrets/url.age;
-    owner = kioskUser;
+  age.secrets = {
+    wifi-env.file = ../../secrets/wifi-env.age;
+    url = {
+      file = ../../secrets/url.age;
+      owner = kioskUser;
+    };
   };
 
   # Don't change this.
