@@ -5,7 +5,8 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAICgJTRCWS9rKQ5g0226IxoeCs74CERdggA0YruAdtlYY" # rien
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJY5nXR/V6wcMRxugD7GTOF8kwfGnAT2CRuJ2Qi60vsm" # chvp
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGgQgerwZXVnVBCfwtWW6m0wg4P4CsrQ6DkjJ61oC6LJ" # redfast00
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFgMEJ9Z+wTwfwWBNzUSOD6TII1kziXAyVVEWWyCcOdE" # xerbalind
+    "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIB5ifsYCLU1oP4wjYPKgF0Jc53CzdbJxwiOQdGXFEaUPAAAABHNzaDo=" # xerbalind
+    "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIH33pRp93TOK5OyidgYVYtWBNKawKFzUilOA7Nb2NWzAAAABHNzaDo=" # mstrypst
   ];
   stateVersion = "22.11";
 in
@@ -48,6 +49,7 @@ in
         "Zeus WPI" = {
           psk = "@PSK_Zeus@";
           hidden = true;
+          authProtocols = [ "WPA-PSK-SHA256" ];
         };
       };
     };
@@ -63,10 +65,10 @@ in
         dhcpV4Config = { RouteMetric = 20; };
         ipv6AcceptRAConfig = { RouteMetric = 20; };
       };
-      eth0 = {
+      end0 = {
         enable = true;
         DHCP = "yes";
-        matchConfig = { Name = "eth0"; };
+        matchConfig = { Name = "end0"; };
         dhcpV4Config = { RouteMetric = 10; };
         ipv6AcceptRAConfig = { RouteMetric = 10; };
       };
