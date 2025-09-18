@@ -91,6 +91,18 @@ in
     displayManager.defaultSession = "none+openbox";
   };
 
+  systemd.services.socat-port-forward = {
+    enable = true;
+    description = "socat port forward 0.0.0.0:1884 -> koin:1884";
+    wantedBy = [ "multi-user.target" ];
+    after = [ "network.target" ];
+    serviceConfig = {
+      ExecStart = "${pkgs.socat}/bin/socat TCP-LISTEN:1884,fork,reuseaddr TCP:koin:1884";
+      Restart = "always";
+      User = "root";
+    };
+  };
+
 
   home-manager.users.${kioskUser} = { pkgs, ... }: {
     home.stateVersion = stateVersion;
