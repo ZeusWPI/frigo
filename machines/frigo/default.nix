@@ -97,7 +97,7 @@ in
     wantedBy = [ "multi-user.target" ];
     after = [ "network.target" ];
     serviceConfig = {
-      ExecStart = "${pkgs.socat}/bin/socat TCP-LISTEN:1884,fork,reuseaddr TCP:koin:1884";
+      ExecStart = "${pkgs.socat}/bin/socat TCP-LISTEN:1884,fork,reuseaddr TCP:192.168.0.12:1884";
       Restart = "always";
       User = "root";
     };
