@@ -7,6 +7,9 @@ let
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGgQgerwZXVnVBCfwtWW6m0wg4P4CsrQ6DkjJ61oC6LJ" # redfast00
     "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIB5ifsYCLU1oP4wjYPKgF0Jc53CzdbJxwiOQdGXFEaUPAAAABHNzaDo=" # xerbalind
     "sk-ssh-ed25519@openssh.com AAAAGnNrLXNzaC1lZDI1NTE5QG9wZW5zc2guY29tAAAAIIH33pRp93TOK5OyidgYVYtWBNKawKFzUilOA7Nb2NWzAAAABHNzaDo=" # mstrypst
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJmNiDqNDsSeB7PhzpVmkwB/FuFVk5bUgS4/yNY7V/a6" # axdzitte
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJKnnnPd5mqvyBXIt68HOI7oZiwQIvUjMAevsgKpSOyB" # caturn
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO4ccYpqIrFKnJdp+gK5zmFPla4eQvEJIU5hdQi7x9xR" # jnms
   ];
   stateVersion = "22.11";
 in
