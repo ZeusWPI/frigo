@@ -85,7 +85,6 @@ in
         enable = true;
         user = kioskUser;
       };
-      xserverArgs = [ "-nocursor" ];
     };
     windowManager.openbox.enable = true;
     displayManager.defaultSession = "none+openbox";
